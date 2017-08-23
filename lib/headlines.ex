@@ -42,33 +42,33 @@ defmodule Headlines do
   end
 
   def all_to_list(data) do
-    IO.puts ""
-    IO.puts ""
-    type = Util.typeof(data)
-    IO.puts "START TYPE = #{type}"
-    IO.inspect data
+    #IO.puts ""
+    #IO.puts ""
+    #type = Util.typeof(data)
+    #IO.puts "START TYPE = #{type}"
+    #IO.inspect data
 
 
     if is_list(data) do
-      IO.puts "LIST"
+      #IO.puts "LIST"
       flattened = List.flatten(data)
 
       if Enum.count(flattened) > 1 do
-        IO.puts "LIST.count > 1"
-        IO.inspect flattened
+        #IO.puts "LIST.count > 1"
+        #IO.inspect flattened
 
         Enum.each(flattened, fn(x) ->
           all_to_list(x)
         end)
       else
-        IO.puts "ADD"
+        #IO.puts "ADD"
         add_to_collector(flattened)
       end
 
     end
 
     if is_tuple(data) do
-      IO.puts "TUPLE"
+      #IO.puts "TUPLE"
       new_data = List.flatten(Tuple.to_list(data))
 
       all_to_list(new_data)
@@ -79,7 +79,7 @@ defmodule Headlines do
     end
 
     end_type = Util.typeof(data)
-    IO.puts "END TYPE = #{end_type}"
+    #IO.puts "END TYPE = #{end_type}"
 
 
     #IO.inspect ["END", data]
