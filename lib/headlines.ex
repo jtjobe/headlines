@@ -6,7 +6,7 @@ defmodule Headlines do
   def nyt do
     response = HTTPoison.get! "https://www.nytimes.com"
     get_links(response.body)
-    |> write_to_csv("nyt")
+    #|> write_to_csv("nyt")
   end
 
   # def cnn do
@@ -41,45 +41,74 @@ defmodule Headlines do
     end)
   end
 
-  def all_to_list(data) do 
+  def all_to_list(data) do
+    IO.puts ""
+    IO.puts ""
+    type = Util.typeof(data)
+    IO.puts "START TYPE = #{type}"
+    IO.inspect data
+
+
     if is_list(data) do
+      IO.puts "LIST"
       flattened = List.flatten(data)
 
       if Enum.count(flattened) > 1 do
+        IO.puts "LIST.count > 1"
+        IO.inspect flattened
+
         Enum.each(flattened, fn(x) ->
           all_to_list(x)
         end)
       else
+        IO.puts "ADD"
         add_to_collector(flattened)
       end
 
     end
 
-    if is_tuple(data) do 
+    if is_tuple(data) do
+      IO.puts "TUPLE"
       new_data = List.flatten(Tuple.to_list(data))
 
       all_to_list(new_data)
     end
 
-    IO.inspect ["END", data]
+    if is_binary(data) do
+      add_to_collector(data)
+    end
+
+    end_type = Util.typeof(data)
+    IO.puts "END TYPE = #{end_type}"
+
+
+    #IO.inspect ["END", data]
   end
 
-  def start_link do 
+  def start_link do
     GenServer.start_link(__MODULE__, [], name: ListCollector)
   end
 
-  def init(state) do 
+  def init(state) do
     {:ok, state}
   end
 
-  def add_to_collector(item) do 
-    GenServer.cast(ListCollector, {:add_to_collector, :world})
+  def add_to_collector(item) do
+    GenServer.cast(ListCollector, {:add_to_collector, item})
   end
 
   def handle_cast({:add_to_collector, item}, state) do
     new_state = [item | state]
     IO.inspect ["NEW_STATE", new_state]
     {:noreply, new_state}
+  end
+
+  def get_collection do
+    GenServer.call(ListCollector, :get_collection)
+  end
+
+  def handle_call(:get_collection, _from, state) do
+    {:reply, state, state}
   end
 
   defp network_write_file(network) do
