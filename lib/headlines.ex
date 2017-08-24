@@ -3,7 +3,7 @@ defmodule Headlines do
   use GenServer
 
   defp network_write_file(network) do
-    "tmp/#{network}.csv"
+    "tmp/#{Atom.to_string(network)}.csv"
   end
 
   def collection_name(index) do
@@ -32,7 +32,7 @@ defmodule Headlines do
       compile_collection(collection_name, :new_york_times)
     end)
 
-    IO.puts "finished"
+    write_to_csv(:new_york_times)
   end
 
   # def cnn do
@@ -45,10 +45,15 @@ defmodule Headlines do
     Floki.find(html, "a")
   end
 
-  def write_to_csv(links, network) do
-    write_file = network_write_file(network)
+  def write_to_csv(network_atom) do
+    write_file = network_write_file(network_atom)
+
+    File.rm(write_file)
 
     File.open(write_file, [:write, :utf8], fn(file) ->
+
+      links = get_network_collection(network_atom)
+
       Enum.map(links, fn(link) ->
         IO.write(file, CSVLixir.write_row(link))
       end)
@@ -104,5 +109,13 @@ defmodule Headlines do
   def handle_cast({:compile_collection, network_name}, state) do
     add_to_collector(state, network_name)
     {:noreply, state}
+  end
+
+  def get_network_collection(network_name) do
+    GenServer.call(network_name, :get_network_collection)
+  end
+
+  def handle_call(:get_network_collection, _from, state) do
+    {:reply, state, state}
   end
 end
