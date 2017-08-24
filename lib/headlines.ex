@@ -13,26 +13,26 @@ defmodule Headlines do
   def nyt do
     response = HTTPoison.get! "https://www.nytimes.com"
     links = get_links(response.body)
-    total_link_count = Enum.count(links)
-    indexed_links = Enum.with_index(links)
+    # total_link_count = Enum.count(links)
+    # indexed_links = Enum.with_index(links)
 
-    start_link(:new_york_times)
+    # start_link(:new_york_times)
 
-    Enum.each(indexed_links, fn(link) ->
-      {link_data, link_index} = link
-      collection_name = collection_name(link_index)
-      start_link(collection_name)
+    # Enum.each(indexed_links, fn(link) ->
+    #   {link_data, link_index} = link
+    #   collection_name = collection_name(link_index)
+    #   start_link(collection_name)
 
-      all_to_list(link_data, link_index)
-    end)
+    #   all_to_list(link_data, link_index)
+    # end)
 
-    Enum.each(indexed_links, fn(link) ->
-      {link_data, link_index} = link
-      collection_name = collection_name(link_index)
-      compile_collection(collection_name, :new_york_times)
-    end)
+    # Enum.each(indexed_links, fn(link) ->
+    #   {link_data, link_index} = link
+    #   collection_name = collection_name(link_index)
+    #   compile_collection(collection_name, :new_york_times)
+    # end)
 
-    write_to_csv(:new_york_times)
+    # write_to_csv(:new_york_times)
   end
 
   # def cnn do
@@ -60,28 +60,52 @@ defmodule Headlines do
     end)
   end
 
-  def all_to_list(data, index) do
+  def all_to_list(raw_data, index) do
+    # data = make_list(raw_data)
 
-    if is_list(data) do
-      flattened = List.flatten(data)
+    data = raw_data
 
-      if Enum.count(flattened) > 1 do
-        Enum.each(flattened, fn(x) ->
-          all_to_list(x, index)
-        end)
+    Enum.reduce(data, [], fn(x, acc) ->
+
+      if is_binary(x) do
+        [x | acc]
+      else
+        t =
+          Enum.reduce(x, [], fn(y, acc) ->
+            if is_tuple(y) do
+              [ Tuple.to_list(y) | acc]
+            else
+              [ y | acc ]
+            end
+          end)
+        [t | acc]
       end
-    end
-
-    if is_tuple(data) do
-      new_data = List.flatten(Tuple.to_list(data))
-      all_to_list(new_data, index)
-    end
-
-    if is_binary(data) do
-      collection_name = collection_name(index)
-      add_to_collector(data, collection_name)
-    end
+    end) |> List.flatten
   end
+
+
+
+
+    # if is_list(data) do
+    #   flattened = List.flatten(data)
+
+    #   if Enum.count(flattened) > 1 do
+    #     Enum.each(flattened, fn(x) ->
+    #       all_to_list(x, index)
+    #     end)
+    #   end
+    # end
+
+    # if is_tuple(data) do
+    #   new_data = List.flatten(Tuple.to_list(data))
+    #   all_to_list(new_data, index)
+    # end
+
+    # if is_binary(data) do
+    #   collection_name = collection_name(index)
+    #   add_to_collector(data, collection_name)
+    # end
+  # end
 
   # GenServer functions
 
