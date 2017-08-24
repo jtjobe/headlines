@@ -78,7 +78,7 @@ defmodule Headlines do
   end
 
   def collection_name(index) do
-    "index_#{index}_collection"
+    String.to_atom("index_#{index}_collection")
   end
 
   def start_link(index) do
