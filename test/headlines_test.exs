@@ -12,14 +12,10 @@ defmodule HeadlinesTest do
       if is_binary(x) do
         [x | acc]
       else
-        t =
-          Enum.reduce(x, [], fn(y, acc) ->
-            if is_tuple(y) do
-              [ Tuple.to_list(y) | acc]
-            else
-              [ y | acc ]
-            end
-          end)
+        t = Enum.reduce(x, [], fn(y, acc) ->
+          if is_tuple(y), do: [ Tuple.to_list(y) | acc], else: [ y | acc ]
+        end)
+
         [t | acc]
       end
     end) |> List.flatten
