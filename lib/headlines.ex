@@ -11,8 +11,21 @@ defmodule Headlines do
 
     Enum.each(indexed_links, fn(link) ->
       {link_data, link_index} = link
+
+      collection_name = collection_name(link_index)
+      start_link(collection_name)
+
       all_to_list(link_data, link_index)
     end)
+
+    Enum.each(indexed_links, fn(link) ->
+      {link_data, link_index} = link
+      collection_name = collection_name(link_index)
+      get_collection(collection_name)
+    end)
+
+    IO.puts "FINISHED"
+
   end
 
   # def cnn do
@@ -83,6 +96,8 @@ defmodule Headlines do
 
   def start_link(index) do
     name = collection_name(index)
+    IO.inspect name
+    IO.puts "started process!"
     GenServer.start_link(__MODULE__, [], name: name)
   end
 
@@ -105,6 +120,7 @@ defmodule Headlines do
   end
 
   def handle_call(:get_collection, _from, state) do
+    IO.inspect "get collection"
     {:reply, state, state}
   end
 
